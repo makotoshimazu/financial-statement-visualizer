@@ -7,7 +7,7 @@ export const Root: FC = () => {
 
   return (
     <>
-      <h1 className={style.headerFoo}>root!!</h1>
+      <h1 className={style.headerFoo}>visualizer</h1>
       <section className={style.inputArea}>
         <div className={style.assetsArea}>
           <h2>資産の部</h2>
