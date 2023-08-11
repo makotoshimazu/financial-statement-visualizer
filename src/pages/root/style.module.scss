@@ -1,0 +1,36 @@
+.headerFoo {
+  color: purple;
+}
+
+.inputArea {
+  display: grid;
+  grid-template-areas:
+    'assets liabilities'
+    'assets equity';
+  grid-template-rows: auto auto;
+  grid-gap: 50px;
+
+  text-align: left;
+
+  & ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  & .labelText {
+    display: inline-block;
+    width: 120px;
+  }
+
+  & .assetsArea {
+    grid-area: assets;
+  }
+
+  & .liabilitiesArea {
+    grid-area: liabilities;
+  }
+
+  & .equityArea {
+    grid-area: equity;
+  }
+}
