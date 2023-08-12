@@ -1,15 +1,24 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import style from './style.module.scss';
+import { useLocalStorage } from '../../lib/storage';
+
+type FinancialStatement = {
+  currentAsset: number;
+  nonCurrentAsset: number;
+}
 
 export const Root: FC = () => {
-  const [currentAsset, setCurrentAsset] = useState(0);
-  const [nonCurrentAsset, setNonCurrentAsset] = useState(0);
+
+  const [fs, setFS] = useLocalStorage<FinancialStatement>('test', {
+    currentAsset: 0,
+    nonCurrentAsset: 0
+  });
 
   return (
     <>
       <h1 className={style.headerFoo}>visualizer</h1>
       <section className={style.inputArea}>
-        <div className={style.assetsArea}>
+        <div>
           <h2>資産の部</h2>
           <ul>
             <li>
@@ -17,9 +26,13 @@ export const Root: FC = () => {
                 <span className={style.labelText}>流動資産合計</span>
                 <input
                   type="number"
-                  value={currentAsset}
+                  value={fs.currentAsset}
                   onChange={(e) => {
-                    setCurrentAsset(Number(e.currentTarget.value));
+                    // setCurrentAsset(Number(e.currentTarget.value));
+                    setFS({
+                      ...fs,
+                      currentAsset: Number(e.currentTarget.value)
+                    })
                   }}
                 />
               </label>
@@ -29,16 +42,20 @@ export const Root: FC = () => {
                 <span className={style.labelText}>固定資産合計</span>
                 <input
                   type="number"
-                  value={nonCurrentAsset}
+                  value={fs.nonCurrentAsset}
                   onChange={(e) => {
-                    setNonCurrentAsset(Number(e.currentTarget.value));
+                    // setNonCurrentAsset(Number(e.currentTarget.value));
+                    setFS({
+                      ...fs,
+                      nonCurrentAsset: Number(e.currentTarget.value)
+                    })
                   }}
                 />
               </label>
             </li>
             <li>
               <span className={style.labelText}>資産合計</span>
-              {currentAsset + nonCurrentAsset}
+              {fs.currentAsset + fs.nonCurrentAsset}
             </li>
           </ul>
         </div>
@@ -113,23 +130,23 @@ export const Root: FC = () => {
             style={{
               backgroundColor: '#dd7',
               height: `${
-                (currentAsset / (currentAsset + nonCurrentAsset)) * 100
+                (fs.currentAsset / (fs.currentAsset + fs.nonCurrentAsset)) * 100
               }%`,
             }}
           >
             <div>流動資産</div>
-            <div>{currentAsset}</div>
+            <div>{fs.currentAsset}</div>
           </div>
           <div
             style={{
               backgroundColor: '#7dd',
               height: `${
-                (nonCurrentAsset / (currentAsset + nonCurrentAsset)) * 100
+                (fs.nonCurrentAsset / (fs.currentAsset + fs.nonCurrentAsset)) * 100
               }%`,
             }}
           >
             <div>固定資産</div>
-            <div>{nonCurrentAsset}</div>
+            <div>{fs.nonCurrentAsset}</div>
           </div>
         </div>
         <div style={{ gridArea: 'liabilitiesAndEquity' }}>
