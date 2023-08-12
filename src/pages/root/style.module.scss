@@ -1,16 +1,21 @@
 .inputArea {
   display: grid;
   grid-template-areas:
+    'header header'
     'assets liabilities'
     'assets equity';
   grid-template-rows: auto auto;
-  grid-gap: 50px;
+  column-gap: 20px;
 
   text-align: left;
 
   & ul {
     list-style-type: none;
     padding: 0;
+  }
+
+  & .header {
+    grid-area: header;
   }
 
   & .labelText {
