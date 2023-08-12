@@ -1,6 +1,7 @@
 import { useId } from "react";
 import style from "./style.module.scss";
 import useLocalStorage from "../../lib/storage";
+import NumberText from "../../components/number_text";
 
 type FinancialStatement = {
   // 流動資産
@@ -41,8 +42,10 @@ type FinancialStatement = {
   plNonOperatingIncome: number;
   // 営業外費用
   plNonOperatingExpenses: number;
-  // 税引前当期純利益
-  plProfitBeforeTax: number;
+  // 特別損失
+  plSpecialLoss: number;
+  // // 税引前当期純利益
+  // plProfitBeforeTax: number;
   // 法人税等
   plCorporateTax: number;
 };
@@ -66,7 +69,7 @@ export default function Root() {
     plSalesAndAdministrativeExpenses: 0,
     plNonOperatingIncome: 0,
     plNonOperatingExpenses: 0,
-    plProfitBeforeTax: 0,
+    plSpecialLoss: 0,
     plCorporateTax: 0,
   });
 
@@ -142,9 +145,23 @@ export default function Root() {
   // const netAssetHeightPercent = (positiveNetAssetsTotal / liabilitiesAndNetAssetsTotal) * 100;
   // const negativeNetAssetHeightPercent = (negativeNetAssetsTotal / liabilitiesAndNetAssetsTotal) * 100;
 
+  // 売上総利益
+  const plGrossProfit = fs.plSales - fs.plCostOfSales;
+  // 営業利益
+  const plOperatingProfit = plGrossProfit - fs.plSalesAndAdministrativeExpenses;
+  // 営業外利益
+  const plNonOperatingProfit =
+    fs.plNonOperatingIncome - fs.plNonOperatingExpenses;
+  // 経常利益
+  const plOrdinaryProfit = plOperatingProfit + plNonOperatingProfit;
+  // 税引前当期純利益
+  const plProfitBeforeTax = plOrdinaryProfit - fs.plSpecialLoss;
+  // 当期純利益
+  const plProfitTotal = plProfitBeforeTax - fs.plCorporateTax;
+
   return (
     <>
-      <section className={style.inputArea}>
+      <section className={[style.inputArea, style.bs].join(" ")}>
         <h2 className={style.header}>BS</h2>
         <div>
           <h3>資産の部</h3>
@@ -202,6 +219,40 @@ export default function Root() {
             </li>
           </ul>
         </div>
+      </section>
+
+      <section className={style.inputArea}>
+        <h2>PL</h2>
+        <ul>
+          {createInputElement("plSales", "売上高")}
+          {createInputElement("plCostOfSales", "売上原価")}
+          <li>
+            <span className={style.labelText}>売上総利益: </span>
+            <NumberText value={plGrossProfit} />
+          </li>
+          {createInputElement("plSalesAndAdministrativeExpenses", "販管費")}
+          <li>
+            <span className={style.labelText}>営業利益: </span>
+            <NumberText value={plOperatingProfit} />
+          </li>
+          {createInputElement("plNonOperatingIncome", "営業外収益")}
+          {createInputElement("plNonOperatingExpenses", "営業外費用")}
+          <li>
+            <span className={style.labelText}>経常利益: </span>
+            <NumberText value={plOrdinaryProfit} />
+          </li>
+          {createInputElement("plSpecialLoss", "特別損失")}
+          {/* {createInputElement("plProfitBeforeTax", "税引前当期純利益")} */}
+          <li>
+            <span className={style.labelText}>税引前当期純利益: </span>
+            <NumberText value={plProfitBeforeTax} />
+          </li>
+          {createInputElement("plCorporateTax", "法人税等")}
+          <li>
+            <span className={style.labelText}>当期純利益: </span>
+            <NumberText value={plProfitTotal} />
+          </li>
+        </ul>
       </section>
 
       <section
