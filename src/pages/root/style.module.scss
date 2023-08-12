@@ -1,9 +1,9 @@
 .inputArea {
   display: grid;
   grid-template-areas:
-    'header header'
-    'assets liabilities'
-    'assets equity';
+    "header header"
+    "assets liabilities"
+    "assets equity";
   grid-template-rows: auto auto;
   column-gap: 20px;
 
