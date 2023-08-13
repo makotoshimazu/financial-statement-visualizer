@@ -1,7 +1,9 @@
-import { useId } from "react";
+import { useId, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import style from "./style.module.scss";
 import useLocalStorage from "../../lib/storage";
 import NumberText from "../../components/number_text";
+import { routes } from "../../lib/routes";
 
 type FinancialStatement = {
   // 流動資産
@@ -51,27 +53,35 @@ type FinancialStatement = {
 };
 
 export default function Root() {
-  const [fs, setFS] = useLocalStorage<FinancialStatement>("test", {
-    currentAsset: 0,
-    nonCurrentAsset: 0,
-    currentLiabilitiesTotal: 0,
-    currentDebt: 0,
-    nonCurrentLiabilitiesTotal: 0,
-    nonCurrentDebt: 0,
-    retainedEarnings: 0,
-    shortTermBonds: 0,
-    bonds: 0,
-    capitalStock: 0,
-    capitalSurplus: 0,
-    subscriptionRights: 0,
-    plSales: 0,
-    plCostOfSales: 0,
-    plSalesAndAdministrativeExpenses: 0,
-    plNonOperatingIncome: 0,
-    plNonOperatingExpenses: 0,
-    plSpecialLoss: 0,
-    plCorporateTax: 0,
-  });
+  const { companyId = "default" } = useParams();
+  const navigate = useNavigate();
+
+  const [fs, setFS, copyFS] = useLocalStorage<FinancialStatement>(
+    `fs/${companyId}`,
+    {
+      currentAsset: 0,
+      nonCurrentAsset: 0,
+      currentLiabilitiesTotal: 0,
+      currentDebt: 0,
+      nonCurrentLiabilitiesTotal: 0,
+      nonCurrentDebt: 0,
+      retainedEarnings: 0,
+      shortTermBonds: 0,
+      bonds: 0,
+      capitalStock: 0,
+      capitalSurplus: 0,
+      subscriptionRights: 0,
+      plSales: 0,
+      plCostOfSales: 0,
+      plSalesAndAdministrativeExpenses: 0,
+      plNonOperatingIncome: 0,
+      plNonOperatingExpenses: 0,
+      plSpecialLoss: 0,
+      plCorporateTax: 0,
+    },
+  );
+
+  const [copyToKey, setCopyToKey] = useState(companyId);
 
   const createInputElement = (key: keyof FinancialStatement, label: string) => {
     const labelId = useId();
@@ -96,6 +106,9 @@ export default function Root() {
       </li>
     );
   };
+
+  // 資産合計
+  const assetTotal = fs.currentAsset + fs.nonCurrentAsset;
 
   // 株主資本合計
   const shareHoldersEquityKeys: Array<keyof FinancialStatement> = [
@@ -159,6 +172,9 @@ export default function Root() {
   // 当期純利益
   const plProfitTotal = plProfitBeforeTax - fs.plCorporateTax;
 
+  // 総資本回転率
+  const totalCapitalTurnoverRatio = fs.plSales / assetTotal;
+
   return (
     <>
       <section className={[style.inputArea, style.bs].join(" ")}>
@@ -168,19 +184,9 @@ export default function Root() {
           <ul>
             {createInputElement("currentAsset", "流動資産合計")}
             {createInputElement("nonCurrentAsset", "固定資産合計")}
-            {/* <li>
-              <label>
-                <span className={style.labelText}>固定資産合計</span>
-                <input
-                  type="number"
-                  value={fs.nonCurrentAsset}
-                  onChange={createNumberInputOnChangeCallback('nonCurrentAsset')}
-                />
-              </label>
-            </li> */}
             <li>
               <span className={style.labelText}>資産合計</span>
-              {fs.currentAsset + fs.nonCurrentAsset}
+              <NumberText value={assetTotal} />
             </li>
           </ul>
         </div>
@@ -204,17 +210,14 @@ export default function Root() {
             <li>
               <div>
                 <span className={style.labelText}>株主資本合計</span>
-                {fs.capitalStock + fs.capitalSurplus + fs.retainedEarnings}
+                <NumberText value={shareHoldersEquity} />
               </div>
             </li>
             {createInputElement("subscriptionRights", "新株予約権")}
             <li>
               <div>
                 <span className={style.labelText}>純資産合計</span>
-                {fs.capitalStock +
-                  fs.capitalSurplus +
-                  fs.retainedEarnings +
-                  fs.subscriptionRights}
+                <NumberText value={netAssetsTotal} />
               </div>
             </li>
           </ul>
@@ -285,7 +288,9 @@ export default function Root() {
               }}
             >
               <div>流動資産</div>
-              <div>{fs.currentAsset}</div>
+              <div>
+                <NumberText value={fs.currentAsset} />
+              </div>
             </div>
             <div
               style={{
@@ -299,7 +304,9 @@ export default function Root() {
               }}
             >
               <div>固定資産</div>
-              <div>{fs.nonCurrentAsset}</div>
+              <div>
+                <NumberText value={fs.nonCurrentAsset} />
+              </div>
             </div>
           </div>
           <div style={{ gridArea: "liabilitiesAndEquity" }}>
@@ -313,7 +320,9 @@ export default function Root() {
               }}
             >
               <div>流動負債</div>
-              <div>{fs.currentLiabilitiesTotal}</div>
+              <div>
+                <NumberText value={fs.currentLiabilitiesTotal} />
+              </div>
             </div>
             <div
               style={{
@@ -325,7 +334,9 @@ export default function Root() {
               }}
             >
               <div>固定負債</div>
-              <div>{fs.nonCurrentLiabilitiesTotal}</div>
+              <div>
+                <NumberText value={fs.nonCurrentLiabilitiesTotal} />
+              </div>
             </div>
             <div
               style={{
@@ -337,7 +348,9 @@ export default function Root() {
               }}
             >
               <div>純資産</div>
-              <div>{netAssetsTotal}</div>
+              <div>
+                <NumberText value={netAssetsTotal} />
+              </div>
             </div>
             <div
               style={{
@@ -359,8 +372,25 @@ export default function Root() {
             // border: '1px solid #223',
           }}
         >
-          売上高: {fs.plSales}
+          売上高: <NumberText value={fs.plSales} />
         </div>
+      </section>
+      <section>
+        <input
+          type="text"
+          value={copyToKey}
+          onChange={(e) => setCopyToKey(e.target.value)}
+          placeholder="保存するIDを入れてください"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            copyFS(`fs/${copyToKey}`);
+            navigate(routes.finantialStatement(copyToKey));
+          }}
+        >
+          保存
+        </button>
       </section>
     </>
   );

@@ -3,7 +3,7 @@ import { useState } from "react";
 const useLocalStorage = <T extends object>(
   key: string,
   defaultValue: T,
-): [T, (newValue: T) => void] => {
+): [T, (newValue: T) => void, (newKey: string) => void] => {
   const serialized = window.localStorage.getItem(key);
   const object = Object.assign(
     structuredClone(defaultValue),
@@ -15,6 +15,9 @@ const useLocalStorage = <T extends object>(
     (newValue: T) => {
       window.localStorage.setItem(key, JSON.stringify(newValue));
       setValue(newValue);
+    },
+    (newKey: string) => {
+      window.localStorage.setItem(newKey, JSON.stringify(value));
     },
   ];
 };
